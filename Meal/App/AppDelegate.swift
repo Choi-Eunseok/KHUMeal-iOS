@@ -2,19 +2,24 @@
 //  AppDelegate.swift
 //  Meal
 //
-//  Created by 최은석 on 12/28/25.
-//
 
 import UIKit
+import FirebaseCore
+import FirebaseMessaging
 
 @main
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
 
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        FirebaseApp.configure()
         return true
+    }
+    
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        UserDefaults.standard.set(fcmToken, forKey: "fcmToken")
     }
 
     // MARK: UISceneSession Lifecycle
