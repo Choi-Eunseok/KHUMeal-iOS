@@ -10,16 +10,24 @@ import FirebaseMessaging
 class SplashViewController: UIViewController {
     
     private let logoImageView: UIImageView = {
-            let iv = UIImageView()
-            iv.image = UIImage(named: "LaunchIcon")
-            iv.contentMode = .scaleAspectFit
-            return iv
-        }()
+        let iv = UIImageView()
+        iv.image = UIImage(named: "LaunchIcon")
+        iv.contentMode = .scaleAspectFit
+        return iv
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        logoImageView.alpha = 0
         setupUI()
         requestUserCreateOrUpdate()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        UIView.animate(withDuration: 0.3) {
+            self.logoImageView.alpha = 1
+        }
     }
     
     private func setupUI() {
@@ -66,11 +74,14 @@ class SplashViewController: UIViewController {
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
             let window = windowScene.windows.first else { return }
         
-        let homeVC = HomeViewController()
-        let nav = UINavigationController(rootViewController: homeVC)
+        let mainContainerVC = MainContainerViewController()
         
-        UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve, animations: {
-            window.rootViewController = nav
+        UIView.transition(with: window,
+                          duration: 0.5,
+                          options: .transitionCrossDissolve,
+                          animations: {
+            window.rootViewController = mainContainerVC
+            window.makeKeyAndVisible()
         }, completion: nil)
     }
 }
