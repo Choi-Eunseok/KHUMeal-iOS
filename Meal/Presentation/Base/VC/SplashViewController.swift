@@ -44,6 +44,7 @@ class SplashViewController: UIViewController {
     private func requestUserCreateOrUpdate() {
         let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "Unknown_ID"
         let fcmToken = UserDefaults.standard.string(forKey: "fcmToken") ?? Messaging.messaging().fcmToken ?? ""
+        UserDefaults.standard.set(deviceID, forKey: "userId")
         
         print("사용자 동기화 요청 (ID: \(deviceID), Token: \(fcmToken))")
         

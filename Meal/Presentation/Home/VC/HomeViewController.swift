@@ -11,31 +11,38 @@ class HomeViewController: UIViewController {
     var onMenuButtonTapped: (() -> Void)?
     let viewModel = HomeViewModel()
 
-    private let topBar: UIView = {
-        let view = UIView()
-        view.backgroundColor = .mainRed
-        return view
+    private let topBarView = TopBarView()
+    
+    private let touchContainer = UIView()
+    
+    private let pagingScrollView: UIScrollView = {
+        let sv = UIScrollView()
+        sv.isPagingEnabled = true
+        sv.clipsToBounds = false
+        sv.showsHorizontalScrollIndicator = false
+        return sv
     }()
     
-    private let menuButton: UIButton = {
-        let button = UIButton()
-        let config = UIImage.SymbolConfiguration(pointSize: 32)
-        button.setImage(UIImage(systemName: "line.3.horizontal", withConfiguration: config), for: .normal)
-        button.tintColor = .white
-        return button
-    }()
-
-    private let titleLabel: UILabel = {
-        let label = UILabel()
-        label.textColor = .white
-        label.font = .systemFont(ofSize: 24, weight: .bold)
-        return label
+    private let horizontalStackView: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.distribution = .fill
+        stack.alignment = .fill
+        stack.spacing = 0
+        return stack
     }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        setupTouchDelegation()
         bindViewModel()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(handleModeChange), name: NSNotification.Name("DisplayModeChanged"), object: nil)
+    }
+    
+    @objc private func handleModeChange() {
+        self.renderWeeklyCards()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -44,37 +51,78 @@ class HomeViewController: UIViewController {
     }
     
     private func setupUI() {
-        view.backgroundColor = .white
+        view.backgroundColor = .mainRed
         
-        view.addSubview(topBar)
-        topBar.snp.makeConstraints { make in
+        view.addSubview(topBarView)
+        view.addSubview(touchContainer)
+        touchContainer.addSubview(pagingScrollView)
+        pagingScrollView.addSubview(horizontalStackView)
+        
+        topBarView.snp.makeConstraints { make in
             make.top.leading.trailing.equalToSuperview()
             make.bottom.equalTo(view.safeAreaLayoutGuide.snp.top).offset(60)
         }
+        topBarView.leftButton.addTarget(self, action: #selector(menuTapped), for: .touchUpInside)
         
-        menuButton.addTarget(self, action: #selector(menuTapped), for: .touchUpInside)
-        topBar.addSubview(menuButton)
-        menuButton.snp.makeConstraints { make in
-            make.leading.equalToSuperview().offset(20)
-            make.bottom.equalToSuperview().offset(-15)
+        touchContainer.snp.makeConstraints { make in
+            make.top.equalTo(topBarView.snp.bottom)
+            make.leading.trailing.equalToSuperview()
+            make.bottom.equalTo(view.safeAreaLayoutGuide)
         }
         
-        topBar.addSubview(titleLabel)
-        titleLabel.snp.makeConstraints { make in
-            make.centerX.equalToSuperview()
-            make.centerY.equalTo(menuButton)
+        pagingScrollView.snp.makeConstraints { make in
+            make.top.bottom.equalToSuperview()
+            make.leading.trailing.equalToSuperview().inset(24)
         }
         
+        horizontalStackView.snp.makeConstraints { make in
+            make.edges.height.equalToSuperview()
+        }
     }
-
+    
     func updateRestaurant(_ restaurant: Restaurant) {
-        viewModel.restaurant = restaurant
+        viewModel.changeRestaurant(to: restaurant)
     }
     
     private func bindViewModel() {
         viewModel.onUpdate = { [weak self] in
             guard let self = self else { return }
-            self.titleLabel.text = self.viewModel.restaurant.name
+            self.topBarView.titleLabel.text = self.viewModel.restaurantName
+            self.renderWeeklyCards()
+        }
+    }
+    
+    private func setupTouchDelegation() {
+        let panGesture = pagingScrollView.panGestureRecognizer
+        touchContainer.addGestureRecognizer(panGesture)
+    }
+    
+    private func renderWeeklyCards() {
+        let isImageMode = UserDefaults.standard.bool(forKey: "isImageMode")
+        let currentMode: MealContentMode = isImageMode ? .image : .text
+        horizontalStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        
+        for mealInfo in viewModel.weeklyMeals {
+            let page = UIView()
+            page.backgroundColor = .clear
+            let card = MealContentCardView()
+            
+            horizontalStackView.addArrangedSubview(page)
+            page.addSubview(card)
+            
+            page.snp.makeConstraints { make in
+                make.width.equalTo(pagingScrollView.snp.width)
+            }
+            
+            card.update(date: mealInfo.date, categories: mealInfo.categories, mode: currentMode)
+            
+            card.onMenuHighlightChanged = { [weak self] uuid, index, isSelected in
+                self?.viewModel.syncHighlightStatus(uuid: uuid, index: index, status: isSelected)
+            }
+            
+            card.snp.makeConstraints { make in
+                make.top.bottom.leading.trailing.equalToSuperview().inset(12)
+            }
         }
     }
     

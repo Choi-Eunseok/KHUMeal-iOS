@@ -9,6 +9,7 @@ import SnapKit
 protocol SideMenuDelegate: AnyObject {
     func didSelectRestaurant(_ restaurant: Restaurant)
     func sideMenuDidInitialLoad(with restaurants: [Restaurant])
+    func didSelectSettings()
 }
 
 class SideMenuViewController: UIViewController {
@@ -86,6 +87,9 @@ class SideMenuViewController: UIViewController {
         
         let settingsBtn = SideMenuRowButton(title: viewModel.settingsTitle, icon: viewModel.settingsIcon)
         contentStackView.addArrangedSubview(settingsBtn)
+        settingsBtn.addAction(UIAction(handler: { [weak self] _ in
+            self?.delegate?.didSelectSettings()
+        }), for: .touchUpInside)
     }
     
     private func initializeFirstSelection() {

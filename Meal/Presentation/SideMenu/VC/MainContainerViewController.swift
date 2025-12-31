@@ -88,4 +88,15 @@ extension MainContainerViewController: SideMenuDelegate {
             homeVC.updateRestaurant(restaurant)
         }
     }
+    
+    func didSelectSettings() {
+        toggleMenu()
+        
+        let settingsVC = SettingsViewController()
+        settingsVC.hidesBottomBarWhenPushed = true
+        
+        if let navController = homeVC.navigationController {
+            navController.pushViewController(settingsVC, animated: true)
+        }
+    }
 }
