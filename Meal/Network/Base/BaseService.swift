@@ -21,7 +21,7 @@ class BaseService {
         if let body = body {
             let jsonData = try JSONEncoder().encode(body)
             if let jsonString = String(data: jsonData, encoding: .utf8) {
-                print("🚀 Sending JSON: \(jsonString)")
+                print("Sending JSON: \(jsonString)")
             }
             request.httpBody = try JSONEncoder().encode(body)
         }

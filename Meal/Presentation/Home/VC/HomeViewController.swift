@@ -10,9 +10,15 @@ class HomeViewController: UIViewController {
     
     var onMenuButtonTapped: (() -> Void)?
     let viewModel = HomeViewModel()
+    
+    private let loadingIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.color = .white
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
 
     private let topBarView = TopBarView()
-    
     private let touchContainer = UIView()
     
     private let pagingScrollView: UIScrollView = {
@@ -53,10 +59,15 @@ class HomeViewController: UIViewController {
     private func setupUI() {
         view.backgroundColor = .mainRed
         
+        view.addSubview(loadingIndicator)
         view.addSubview(topBarView)
         view.addSubview(touchContainer)
         touchContainer.addSubview(pagingScrollView)
         pagingScrollView.addSubview(horizontalStackView)
+        
+        loadingIndicator.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+        }
         
         topBarView.snp.makeConstraints { make in
             make.top.leading.trailing.equalToSuperview()
@@ -89,6 +100,20 @@ class HomeViewController: UIViewController {
             guard let self = self else { return }
             self.topBarView.titleLabel.text = self.viewModel.restaurantName
             self.renderWeeklyCards()
+            DispatchQueue.main.async {
+                self.scrollToToday(animated: false)
+            }
+        }
+        viewModel.onLoadingStatusChanged = { [weak self] isLoading in
+            DispatchQueue.main.async {
+                if isLoading {
+                    self?.loadingIndicator.startAnimating()
+                    self?.pagingScrollView.alpha = 0.5
+                } else {
+                    self?.loadingIndicator.stopAnimating()
+                    self?.pagingScrollView.alpha = 1.0
+                }
+            }
         }
     }
     
@@ -123,6 +148,16 @@ class HomeViewController: UIViewController {
             card.snp.makeConstraints { make in
                 make.top.bottom.leading.trailing.equalToSuperview().inset(12)
             }
+        }
+    }
+    
+    private func scrollToToday(animated: Bool) {
+        let todayIndex = viewModel.getTodayIndex()
+        let pageWidth = pagingScrollView.frame.width
+        
+        if pageWidth > 0 {
+            let offset = CGPoint(x: CGFloat(todayIndex) * pageWidth, y: 0)
+            pagingScrollView.setContentOffset(offset, animated: animated)
         }
     }
     

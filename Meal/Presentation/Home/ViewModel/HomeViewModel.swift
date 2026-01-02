@@ -31,16 +31,29 @@ class HomeViewModel {
     
     var highlightedUuids: Set<String> = []
     
+    var onLoadingStatusChanged: ((Bool) -> Void)?
+    
     init() {
         
     }
     
     func changeRestaurant(to restaurant: Restaurant) {
+        self.weeklyMeals = []
         self.restaurantName = restaurant.name
         fetchWeeklyData(for: restaurant.id)
     }
     
+    func getTodayIndex() -> Int {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        
+        let todayString = formatter.string(from: Date())
+        
+        return weeklyMeals.firstIndex(where: { formatter.string(from: $0.date) == todayString }) ?? 0
+    }
+    
     func fetchWeeklyData(for restaurantId: Int) {
+        onLoadingStatusChanged?(true)
         Task {
             do {
                 let weeklyData = try await MealService.shared.fetchThisWeekMeals(restaurantId: restaurantId)
@@ -54,8 +67,12 @@ class HomeViewModel {
                 await MainActor.run {
                     self.highlightedUuids = highlightedUuids
                     self.weeklyMeals = weeklyData
+                    self.onLoadingStatusChanged?(false)
                 }
             } catch {
+                await MainActor.run {
+                    self.onLoadingStatusChanged?(false)
+                }
                 print("데이터 로드 실패: \(error)")
             }
         }
