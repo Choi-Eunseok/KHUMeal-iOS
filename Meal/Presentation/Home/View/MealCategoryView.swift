@@ -9,7 +9,7 @@ import SnapKit
 class MealCategoryView: UIView {
     
     private var categoryUuid: String?
-    var onMenuHighlightChanged: ((String, Int, Bool) -> Void)?
+    var onMenuHighlightChanged: ((String, Bool) -> Void)?
     
     private let titleLabel: UILabel = {
         let label = UILabel()
@@ -49,21 +49,24 @@ class MealCategoryView: UIView {
         imageView.isHidden = (mode != .image)
     }
     
-    func configure(with category: MealCategory, mode: MealContentMode) {
-        self.categoryUuid = category.uuid
-        titleLabel.text = category.title
+    func configure(with menuInfo: MenuInfo, mode: MealContentMode, highlightedUuids: Set<String>) {
+        self.categoryUuid = menuInfo.menuInfoUuid
+        titleLabel.text = menuInfo.cornerName
         apply(mode: mode)
         
         switch mode {
         case .text:
             menuStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
             
-            for (index, menuText) in category.menus.enumerated() {
-                let itemView = MealMenuItemView(text: menuText)
+            for item in menuInfo.items {
+                let itemView = MealMenuItemView(text: item.menuItemName)
+                
+                itemView.isHighlighted = highlightedUuids.contains(item.menuItemUuid)
                 
                 itemView.onToggleHighlight = { [weak self] isSelected in
-                    guard let self = self, let uuid = self.categoryUuid else { return }
-                    self.onMenuHighlightChanged?(uuid, index, isSelected)
+                    guard let self = self else { return }
+                    // 이제 인덱스가 아닌 아이템의 고유 UUID를 쏩니다.
+                    self.onMenuHighlightChanged?(item.menuItemUuid, isSelected)
                 }
                 
                 menuStackView.addArrangedSubview(itemView)
@@ -71,7 +74,7 @@ class MealCategoryView: UIView {
             imageView.prepareForReuse()
             
         case .image:
-            let url = URL(string: category.image ?? "")
+            let url = URL(string: menuInfo.image ?? "")
             imageView.configure(imageURL: url)
         }
     }

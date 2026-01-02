@@ -29,6 +29,8 @@ class HomeViewModel {
         return UserDefaults.standard.string(forKey: "userId") ?? "Unknown_ID"
     }
     
+    var highlightedUuids: Set<String> = []
+    
     init() {
         
     }
@@ -42,10 +44,16 @@ class HomeViewModel {
         Task {
             do {
                 let weeklyData = try await MealService.shared.fetchThisWeekMeals(restaurantId: restaurantId)
+                let allMenuItemUuids = weeklyData.flatMap { daily in
+                        daily.menuInfos.flatMap { info in
+                            info.items.map { $0.menuItemUuid }
+                        }
+                    }
+                let highlightedUuids = try await UserService.shared.fetchUserHighlights(userId: self.userId, uuids: allMenuItemUuids)
                 
                 await MainActor.run {
+                    self.highlightedUuids = highlightedUuids
                     self.weeklyMeals = weeklyData
-                    self.onUpdate?()
                 }
             } catch {
                 print("데이터 로드 실패: \(error)")
@@ -53,21 +61,25 @@ class HomeViewModel {
         }
     }
     
-    func syncHighlightStatus(uuid: String, index: Int, status: Bool) {
-        print("User: \(self.userId), UUID: \(uuid), Index: \(index) as \(status)")
-        
-//        Task {
-//            do {
-//                try await MealService.shared.postHighlight(
-//                    uuid: uuid,
-//                    userId: userId,
-//                    index: index,
-//                    status: status
-//                )
-//                print("Successfully synced: \(uuid) [\(index)] as \(status)")
-//            } catch {
-//                print("Failed to sync highlight: \(error)")
-//            }
-//        }
+    func syncHighlightStatus(uuid: String, status: Bool) {
+        Task {
+            do {
+                try await UserService.shared.postHighlight(
+                    menuItemUuid: uuid,
+                    userId: userId,
+                    status: status
+                )
+                
+                if status {
+                    highlightedUuids.insert(uuid)
+                } else {
+                    highlightedUuids.remove(uuid)
+                }
+                
+                print("Successfully synced: \(uuid) as \(status)")
+            } catch {
+                print("Failed to sync highlight: \(error)")
+            }
+        }
     }
 }

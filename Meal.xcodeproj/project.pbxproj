@@ -60,22 +60,11 @@
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
-/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-		8890A7292F016E6900CBE651 /* Exceptions for "Meal" folder in "Copy Bundle Resources" phase from "Meal" target */ = {
-			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
-			buildPhase = 8890A6C72F01631B00CBE651 /* Resources */;
-			membershipExceptions = (
-				Presentation/Base/VC/SplashViewController.swift,
-			);
-		};
-/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		8890A6CB2F01631B00CBE651 /* Meal */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				8890A6F12F01631C00CBE651 /* Exceptions for "Meal" folder in "Meal" target */,
-				8890A7292F016E6900CBE651 /* Exceptions for "Meal" folder in "Copy Bundle Resources" phase from "Meal" target */,
 			);
 			path = Meal;
 			sourceTree = "<group>";

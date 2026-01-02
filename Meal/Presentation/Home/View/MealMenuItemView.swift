@@ -8,6 +8,7 @@ import SnapKit
 
 final class MealMenuItemView: UIView {
     
+    private var menuItemUuid: String?
     var onToggleHighlight: ((Bool) -> Void)?
     
     private let highlightView: UIView = {

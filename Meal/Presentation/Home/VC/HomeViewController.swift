@@ -114,10 +114,10 @@ class HomeViewController: UIViewController {
                 make.width.equalTo(pagingScrollView.snp.width)
             }
             
-            card.update(date: mealInfo.date, categories: mealInfo.categories, mode: currentMode)
+            card.update(date: mealInfo.date, menuInfos: mealInfo.menuInfos, mode: currentMode, highlightedUuids: viewModel.highlightedUuids)
             
-            card.onMenuHighlightChanged = { [weak self] uuid, index, isSelected in
-                self?.viewModel.syncHighlightStatus(uuid: uuid, index: index, status: isSelected)
+            card.onMenuHighlightChanged = { [weak self] uuid, isSelected in
+                self?.viewModel.syncHighlightStatus(uuid: uuid, status: isSelected)
             }
             
             card.snp.makeConstraints { make in

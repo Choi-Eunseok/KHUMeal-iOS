@@ -5,8 +5,14 @@
 
 import Foundation
 
-struct UserSyncRequest: Encodable {
-    let user_id: String
-    let fcm_token: String
+struct UserSyncRequest: Codable {
+    let userId: String
+    let fcmToken: String
     let platform: String
+    
+    enum CodingKeys: String, CodingKey {
+        case userId = "user_id"
+        case fcmToken = "fcm_token"
+        case platform = "platform"
+    }
 }

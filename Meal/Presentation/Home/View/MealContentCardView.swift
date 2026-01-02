@@ -8,7 +8,7 @@ import SnapKit
 
 final class MealContentCardView: UIView {
     
-    var onMenuHighlightChanged: ((String, Int, Bool) -> Void)?
+    var onMenuHighlightChanged: ((String, Bool) -> Void)?
     
     private let dayLabel: UILabel = {
         let label = UILabel()
@@ -82,7 +82,7 @@ final class MealContentCardView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func update(date: Date, categories: [MealCategory], mode: MealContentMode) {
+    func update(date: Date, menuInfos: [MenuInfo], mode: MealContentMode, highlightedUuids: Set<String>) {
         let dayFormatter = DateFormatter()
         dayFormatter.dateFormat = "E요일"
         dayFormatter.locale = Locale(identifier: "ko_KR")
@@ -96,11 +96,11 @@ final class MealContentCardView: UIView {
         
         stackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         
-        for category in categories {
+        for menuInfo in menuInfos {
             let categoryView = MealCategoryView()
-            categoryView.configure(with: category, mode: mode)
-            categoryView.onMenuHighlightChanged = { [weak self] uuid, index, status in
-                self?.onMenuHighlightChanged?(uuid, index, status)
+            categoryView.configure(with: menuInfo, mode: mode, highlightedUuids: highlightedUuids)
+            categoryView.onMenuHighlightChanged = { [weak self] uuid, status in
+                self?.onMenuHighlightChanged?(uuid, status)
             }
             stackView.addArrangedSubview(categoryView)
         }

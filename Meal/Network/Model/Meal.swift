@@ -5,35 +5,26 @@
 
 import Foundation
 
-struct MealCategory: Codable {
-    let uuid: String
-    let title: String
-    let menus: [String]
-    private let imagePath: String?
+struct DailyMealInfo: Codable {
+    let restaurantName: String
+    let date: Date
+    let menuInfos: [MenuInfo]
+}
 
-    enum CodingKeys: String, CodingKey {
-        case uuid = "menuInfoUuid"
-        case title = "cornerName"
-        case menus = "items"
-        case imagePath = "imageUrl"
-    }
-    
+struct MenuInfo: Codable {
+    let menuInfoUuid: String
+    let cornerName: String
+    let items: [MenuItem]
+    let imageUrl: String?
     var image: String? {
-        guard let path = imagePath else { return nil }
+        guard let path = imageUrl else { return nil }
         return NetworkConfig.baseURL + path
     }
 }
 
-struct DailyMealInfo: Codable {
-    let restaurantName: String
-    let date: Date
-    let categories: [MealCategory]
-
-    enum CodingKeys: String, CodingKey {
-        case restaurantName
-        case date
-        case categories = "menuItems"
-    }
+struct MenuItem: Codable {
+    let menuItemUuid: String
+    let menuItemName: String
 }
 
 enum MealContentMode {
