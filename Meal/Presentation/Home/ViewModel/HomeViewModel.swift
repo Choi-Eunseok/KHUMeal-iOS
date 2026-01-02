@@ -11,7 +11,10 @@ class HomeViewModel {
     private let lastSelectedKey = "lastSelectedRestaurantName"
     
     var restaurantName: String = "로딩 중..." {
-        didSet { onUpdate?() }
+        didSet {
+            UserDefaults.standard.set(restaurantName, forKey: lastSelectedKey)
+            onUpdate?()
+        }
     }
     
     var lastSavedName: String? {
@@ -22,11 +25,9 @@ class HomeViewModel {
         didSet { onUpdate?() }
     }
     
-//    private let mealService: MealService
-    
     var userId: String {
-            return UserDefaults.standard.string(forKey: "userId") ?? "Unknown_ID"
-        }
+        return UserDefaults.standard.string(forKey: "userId") ?? "Unknown_ID"
+    }
     
     init() {
         
@@ -38,23 +39,18 @@ class HomeViewModel {
     }
     
     func fetchWeeklyData(for restaurantId: Int) {
-        var dummyWeekly: [DailyMealInfo] = []
-        let calendar = Calendar.current
-        let today = Date()
-        for i in 0..<7 {
-            if let date = calendar.date(byAdding: .day, value: i, to: today) {
-                let categories = [
-                    MealCategory(uuid: "t", title: "교직원 소담", menus: ["메뉴 A", "메뉴 B"], image: "https://REPLACED_URL/api/image/7c8f9bbe-8891-4110-b881-e78a86a3c5c1"),
-                    MealCategory(uuid: "t", title: "학생식당", menus: ["메뉴 C", "메뉴 D", "메뉴 E"], image: "https://REPLACED_URL/api/image/7c8f9bbe-8891-4110-b881-e78a86a3c5c1"),
-                    MealCategory(uuid: "t", title: "교직원 소담", menus: ["메뉴 A", "메뉴 B"], image: "https://REPLACED_URL/api/image/7c8f9bbe-8891-4110-b881-e78a86a3c5c1"),
-                    MealCategory(uuid: "t", title: "학생식당", menus: ["메뉴 C", "메뉴 D", "메뉴 E"], image: "https://REPLACED_URL/api/image/7c8f9bbe-8891-4110-b881-e78a86a3c5c1"),
-                    MealCategory(uuid: "t", title: "교직원 소담", menus: ["메뉴 A", "메뉴 B"], image: "https://REPLACED_URL/api/image/7c8f9bbe-8891-4110-b881-e78a86a3c5c1"),
-                    MealCategory(uuid: "t", title: "학생식당", menus: ["메뉴 C", "메뉴 D", "메뉴 E"], image: "https://REPLACED_URL/api/image/7c8f9bbe-8891-4110-b881-e78a86a3c5c1")
-                ]
-                dummyWeekly.append(DailyMealInfo(date: date, categories: categories))
+        Task {
+            do {
+                let weeklyData = try await MealService.shared.fetchThisWeekMeals(restaurantId: restaurantId)
+                
+                await MainActor.run {
+                    self.weeklyMeals = weeklyData
+                    self.onUpdate?()
+                }
+            } catch {
+                print("데이터 로드 실패: \(error)")
             }
         }
-        self.weeklyMeals = dummyWeekly
     }
     
     func syncHighlightStatus(uuid: String, index: Int, status: Bool) {

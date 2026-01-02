@@ -97,19 +97,20 @@ class MealCategoryView: UIView {
         }
         
         separator.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(15)
+            make.top.equalTo(titleLabel.snp.bottom).offset(12)
             make.leading.trailing.equalToSuperview().inset(20)
             make.height.equalTo(1)
         }
         
         menuStackView.snp.makeConstraints { make in
-            make.top.equalTo(separator.snp.bottom).offset(15)
-            make.leading.trailing.bottom.equalToSuperview().inset(20)
+            make.top.equalTo(separator.snp.bottom).offset(12)
+            make.leading.trailing.bottom.equalToSuperview().inset(24)
         }
         
         imageView.snp.makeConstraints { make in
-            make.top.equalTo(separator.snp.bottom).offset(15)
-            make.leading.trailing.bottom.equalToSuperview().inset(20)
+            make.top.equalTo(separator.snp.bottom).offset(4)
+            make.bottom.equalToSuperview().inset(12)
+            make.leading.trailing.equalToSuperview().inset(24)
         }
     }
 }

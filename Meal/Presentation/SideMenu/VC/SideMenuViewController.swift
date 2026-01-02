@@ -81,7 +81,7 @@ class SideMenuViewController: UIViewController {
         
         let line = UIView()
         line.backgroundColor = .white.withAlphaComponent(0.1)
-        line.snp.makeConstraints { $0.height.equalTo(1) }
+        line.snp.makeConstraints { $0.height.equalTo(0.5) }
         contentStackView.addArrangedSubview(line)
         contentStackView.setCustomSpacing(20, after: line)
         

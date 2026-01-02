@@ -19,10 +19,14 @@ final class MealImageView: UIView {
     private let innerBorderView: UIView = {
         let v = UIView()
         v.backgroundColor = .clear
-        v.layer.borderWidth = 2
-        v.layer.borderColor = UIColor.white.cgColor
+        v.isUserInteractionEnabled = false
         return v
     }()
+    
+    private let leftBorder = UIView()
+    private let rightBorder = UIView()
+    private let topBorder = UIView()
+    private let bottomBorder = UIView()
     
     private var currentImageURL: URL?
     private var aspectRatioConstraint: Constraint?
@@ -30,6 +34,7 @@ final class MealImageView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
+        setupBorderLayout()
     }
     
     required init?(coder: NSCoder) { fatalError() }
@@ -92,6 +97,35 @@ final class MealImageView: UIView {
         
         innerBorderView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
+        }
+    }
+    
+    private func setupBorderLayout() {
+        let borderColor = UIColor.white
+        
+        [leftBorder, rightBorder, topBorder, bottomBorder].forEach {
+            $0.backgroundColor = borderColor
+            innerBorderView.addSubview($0)
+        }
+        
+        leftBorder.snp.makeConstraints { make in
+            make.leading.top.bottom.equalToSuperview()
+            make.width.equalTo(4)
+        }
+        
+        rightBorder.snp.makeConstraints { make in
+            make.trailing.top.bottom.equalToSuperview()
+            make.width.equalTo(4)
+        }
+        
+        topBorder.snp.makeConstraints { make in
+            make.top.leading.trailing.equalToSuperview()
+            make.height.equalTo(2)
+        }
+        
+        bottomBorder.snp.makeConstraints { make in
+            make.bottom.leading.trailing.equalToSuperview()
+            make.height.equalTo(0)
         }
     }
 }
