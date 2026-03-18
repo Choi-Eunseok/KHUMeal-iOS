@@ -24,7 +24,7 @@ final class SettingItemSwitchView: UIView {
     required init?(coder: NSCoder) { fatalError() }
     
     private func setupUI() {
-        backgroundColor = .white
+        backgroundColor = .secondarySystemGroupedBackground
         layer.cornerRadius = 12
         
         addSubview(titleLabel)
