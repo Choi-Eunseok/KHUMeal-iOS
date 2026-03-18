@@ -21,10 +21,9 @@ class UserService: BaseService {
     }
     
     func fetchUserHighlights(userId: String, uuids: [String]) async throws -> Set<String> {
-        let uuidParams = uuids.joined(separator: ",")
-        let endpoint = "\(NetworkConfig.baseURL)/api/v1/users/\(userId)/highlights?menuUuids=\(uuidParams)"
+        let endpoint = "\(NetworkConfig.baseURL)/api/v2/users/\(userId)/highlights"
         
-        let data = try await requestWithData(url: endpoint, method: "GET", body: nil)
+        let data = try await requestWithData(url: endpoint, method: "POST", body: uuids)
         let response = try JSONDecoder().decode(UserHighlightResponse.self, from: data)
         
         return Set(response.highlightedUuids)
